@@ -9,6 +9,10 @@ use App\Http\Controllers\Customer\AuthController as CustomerAuth;
 
 Route::prefix('admin')->group(function () {
 
+    Route::get('/register', [AdminAuth::class, 'showRegister'])->name('admin.register');
+    Route::post('/register', [AdminAuth::class, 'register']);
+
+
     Route::get('/login', [AdminAuth::class, 'showLogin'])->name('admin.login');
     Route::post('/login', [AdminAuth::class, 'login']);
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('admin.logout');
@@ -22,7 +26,10 @@ Route::prefix('admin')->group(function () {
 
 
 Route::prefix('customer')->group(function () {
+    Route::get('/register', [CustomerAuth::class, 'showRegister'])->name('customer.register');
+    Route::post('/register', [CustomerAuth::class, 'register']);
 
+    
     Route::get('/login', [CustomerAuth::class, 'showLogin'])->name('customer.login');
     Route::post('/login', [CustomerAuth::class, 'login']);
     Route::post('/logout', [CustomerAuth::class, 'logout'])->name('customer.logout');
@@ -37,5 +44,4 @@ Route::prefix('customer')->group(function () {
 
 
 
-require __DIR__.'/settings.php';   
-   
+require __DIR__ . '/settings.php';
