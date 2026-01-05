@@ -1,19 +1,43 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { reactive, watch } from 'vue'
 
-defineProps<{
-    products: {
-        data: any[]
-        links: any[]
+const props = defineProps<{
+    products: any
+    filters: {
+        search?: string
+        category?: string
+        stock?: string
     }
 }>()
 
+const filters = reactive({
+    search: props.filters.search || '',
+    category: props.filters.category || '',
+    stock: props.filters.stock || '',
+})
+
+watch(filters, () => {
+    setTimeout(() => {
+        router.get('/admin/products', filters, {
+            preserveState: true,
+            replace: true,
+        })
+    }, 500)
+
+})
+
+const destroy = (id: number) => {
+    if (confirm('Are you sure?')) {
+        router.delete(`/admin/products/${id}`)
+    }
+}
+
 const getImage = (image: string | null) => {
-    return image
-        ? `${image}`
-        : '/default.png'
+    return image && image.trim() !== '' ? image : '/default.png'
 }
 </script>
+
 
 <template>
 
@@ -28,9 +52,53 @@ const getImage = (image: string | null) => {
             </Link>
         </div>
 
-        <!-- Products Table -->
         <div class="card shadow-sm">
             <div class="card-body p-0">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2">
+
+                            <!-- Search -->
+                            <div class="col-md-4">
+                                <input v-model="filters.search" type="text" class="form-control"
+                                    placeholder="Search by product name..." />
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-md-3">
+                                <select v-model="filters.category" class="form-select">
+                                    <option value="">All Categories</option>
+                                    <option>Mobiles</option>
+                                    <option>Laptops</option>
+                                    <option>Accessories</option>
+                                    <option>Electronics</option>
+                                </select>
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="col-md-3">
+                                <select v-model="filters.stock" class="form-select">
+                                    <option value="">All Stock</option>
+                                    <option value="in">In Stock</option>
+                                    <option value="out">Out of Stock</option>
+                                </select>
+                            </div>
+
+                            <!-- Reset -->
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" @click="() => {
+                                    filters.search = ''
+                                    filters.category = ''
+                                    filters.stock = ''
+                                }">
+                                    Reset
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
@@ -39,6 +107,7 @@ const getImage = (image: string | null) => {
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
+                            <th width="160">Actions</th>
                         </tr>
                     </thead>
 
@@ -59,10 +128,20 @@ const getImage = (image: string | null) => {
                                     {{ product.product_stock > 0 ? 'In Stock' : 'Out of Stock' }}
                                 </span>
                             </td>
+                            <td>
+                                <Link :href="`/admin/products/${product.product_id}/edit`"
+                                    class="btn btn-sm btn-warning me-2">
+                                    Edit
+                                </Link>
+
+                                <button class="btn btn-sm btn-danger" @click="destroy(product.product_id)">
+                                    Delete
+                                </button>
+                            </td>
                         </tr>
 
                         <tr v-if="products.data.length === 0">
-                            <td colspan="5" class="text-center py-4">
+                            <td colspan="6" class="text-center py-4">
                                 No products found
                             </td>
                         </tr>
