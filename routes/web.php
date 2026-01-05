@@ -5,7 +5,12 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 use App\Http\Controllers\Admin\AuthController as AdminAuth;
+use App\Http\Controllers\Admin\ProductImportController;
+use App\Http\Controllers\Admin\ProductController;
+
+
 use App\Http\Controllers\Customer\AuthController as CustomerAuth;
+
 
 Route::prefix('admin')->group(function () {
 
@@ -18,9 +23,16 @@ Route::prefix('admin')->group(function () {
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('admin.logout');
 
     Route::middleware('auth:admin')->group(function () {
+        Route::get('/products', [ProductController::class, 'index'])
+            ->name('admin.products.index');
+
         Route::get('/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');
+        Route::get('/products/import', function () {
+            return Inertia::render('Admin/ProductImport');
+        })->name('admin.products.import.page');
+        Route::post('/products/import', [ProductImportController::class, 'import'])->name('admin.products.import');
     });
 });
 
@@ -29,7 +41,7 @@ Route::prefix('customer')->group(function () {
     Route::get('/register', [CustomerAuth::class, 'showRegister'])->name('customer.register');
     Route::post('/register', [CustomerAuth::class, 'register']);
 
-    
+
     Route::get('/login', [CustomerAuth::class, 'showLogin'])->name('customer.login');
     Route::post('/login', [CustomerAuth::class, 'login']);
     Route::post('/logout', [CustomerAuth::class, 'logout'])->name('customer.logout');

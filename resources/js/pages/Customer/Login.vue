@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router, Link } from '@inertiajs/vue3'
 import axios from 'axios'
 
 const form = ref({
@@ -92,6 +92,15 @@ const submit = async () => {
                     </div>
 
                 </form>
+
+                <div class="text-center mt-3">
+                    <small>
+                        Don’t have an account?
+                        <Link href="/admin/register" class="text-decoration-none fw-semibold">
+                        Register here
+                        </Link>
+                    </small>
+                </div>
 
             </div>
         </div>
