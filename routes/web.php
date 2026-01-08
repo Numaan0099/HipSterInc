@@ -10,11 +10,7 @@ use App\Http\Controllers\Admin\ProductImportController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuth;
 
-/*
-|--------------------------------------------------------------------------
-| Debug route (KEEP TEMPORARILY)
-|--------------------------------------------------------------------------
-*/
+
 Route::get('/__broadcast-debug', function () {
     return [
         'web' => auth('web')->check(),
@@ -24,22 +20,13 @@ Route::get('/__broadcast-debug', function () {
     ];
 });
 
-/*
-|--------------------------------------------------------------------------
-| Broadcasting auth routes (CORRECT WAY)
-|--------------------------------------------------------------------------
-*/
+
 Route::middleware(['auth:customer'])
     ->post('/broadcasting/auth/customer', [BroadcastController::class, 'authenticate']);
 
 Route::middleware(['auth:admin'])
     ->post('/broadcasting/auth/admin', [BroadcastController::class, 'authenticate']);
-
-/*
-|--------------------------------------------------------------------------
-| Admin routes
-|--------------------------------------------------------------------------
-*/
+    
 Route::middleware('web')
     ->prefix('admin')
     ->name('admin.')
