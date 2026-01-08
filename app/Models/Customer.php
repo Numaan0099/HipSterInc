@@ -19,6 +19,7 @@ class Customer extends Authenticatable
         'customer_name',
         'customer_email',
         'password',
+        'is_online'
     ];
 
     protected $hidden = [
@@ -30,4 +31,13 @@ class Customer extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function getAuthIdentifierName()
+    {
+        return 'customer_id';
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
 }

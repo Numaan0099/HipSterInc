@@ -96,7 +96,7 @@ const submit = async () => {
                 <div class="text-center mt-3">
                     <small>
                         Don’t have an account?
-                        <Link href="/admin/register" class="text-decoration-none fw-semibold">
+                        <Link href="/customer/register" class="text-decoration-none fw-semibold">
                         Register here
                         </Link>
                     </small>

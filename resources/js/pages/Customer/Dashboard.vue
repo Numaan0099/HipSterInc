@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
+import CustomerLayout from '@/Layouts/CustomerLayout.vue'
 
-const logout = () => {
-    router.post('/customer/logout')
-}
+defineOptions({
+    layout: CustomerLayout,
+})
 </script>
 
 <template>
     <Head title="Customer Dashboard" />
-    <h1>Customer Dashboard</h1>
-    <button @click="logout">Logout</button>
+
+    <div class="container mt-4">
+        <h3>Welcome to Customer Dashboard</h3>
+    </div>
 </template>

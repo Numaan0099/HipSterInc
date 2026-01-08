@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Hash;
 
 use Inertia\Inertia;
 use App\Models\Customer;
+use App\Events\CustomerOnlineStatusChanged;
+use App\Events\UserOnlineStatusChanged;
+
 
 class AuthController extends Controller
 {
@@ -26,26 +29,42 @@ class AuthController extends Controller
 
 
         if (!Auth::guard('customer')->attempt($credentials)) {
-
-
             return response()->json(['error' => 'Invalid customer credentials'], 401);
         }
 
 
         $request->session()->regenerate();
+        $customer = Auth::guard('customer')->user();
+
+        $customer->update([
+            'is_online' => 1
+        ]);
+        broadcast(new CustomerOnlineStatusChanged($customer))->toOthers();
 
         return redirect()->route('customer.dashboard');
     }
 
     public function logout(Request $request)
     {
+        $customer = auth('customer')->user();
+
         Auth::guard('customer')->logout();
+
+        if ($customer) {
+            broadcast(new UserOnlineStatusChanged(
+                role: 'customer',
+                user_id: $customer->customer_id,
+                name: $customer->customer_name,
+                is_online: false
+            ))->toOthers();
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('customer.login');
     }
+
 
     public function showRegister()
     {

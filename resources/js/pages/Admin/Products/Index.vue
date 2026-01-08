@@ -46,7 +46,9 @@ const getImage = (image: string | null) => {
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3>Products</h3>
-
+            <Link href="/admin/imports" class="btn btn-outline-primary">
+                View Imports
+            </Link>
             <Link href="/admin/products/import" class="btn btn-outline-primary">
                 Import Products
             </Link>

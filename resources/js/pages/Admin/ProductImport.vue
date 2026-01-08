@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import axios from 'axios'
-import { Head } from '@inertiajs/vue3'
+import { Head, router  } from '@inertiajs/vue3'
 
 const file = ref<File | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -37,6 +37,8 @@ const submit = async () => {
         if (fileInput.value) {
             fileInput.value.value = ''
         }
+        router.visit('/admin/imports')
+
 
     } catch (error) {
         console.error(error)

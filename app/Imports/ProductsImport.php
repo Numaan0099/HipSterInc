@@ -3,6 +3,8 @@
 namespace App\Imports;
 
 use App\Models\Product;
+use App\Models\Import;
+
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,6 +19,21 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class ProductsImport implements ToModel, WithChunkReading, WithValidation, WithHeadingRow, ShouldQueue
 {
+    protected $importId;
+    public function __construct(int $importId)
+    {
+        $this->importId = $importId;
+
+        Import::where('import_id', $this->importId)
+            ->update(['status' => 'processing']);
+    }
+    public function __destruct()
+    {
+        Import::where('import_id', $this->importId)
+            ->update(['status' => 'completed']);
+    }
+
+
     public function model(array $row)
     {
         $imagePath = 'default.png';
@@ -25,8 +42,9 @@ class ProductsImport implements ToModel, WithChunkReading, WithValidation, WithH
 
         if ($providedImage && filter_var($providedImage, FILTER_VALIDATE_URL)) {
             $imagePath = $providedImage;
-        }  
+        }
 
+        Import::where('import_id', $this->importId)->increment('processed_rows');
 
         return new Product([
             'product_name'        => $row['product_name'] ?? null,
@@ -49,6 +67,14 @@ class ProductsImport implements ToModel, WithChunkReading, WithValidation, WithH
             'product_image' => 'nullable|string|max:255',
         ];
     }
+
+    public function onFailure(...$failures)
+    {
+        Import::where('import_id', $this->importId)
+            ->increment('failed_rows', count($failures));
+    }
+
+
     public function headingRow(): int
     {
         return 1;

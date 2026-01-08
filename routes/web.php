@@ -2,17 +2,46 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Broadcasting\BroadcastController;
 
 use App\Http\Controllers\Admin\AuthController as AdminAuth;
 use App\Http\Controllers\Admin\ProductImportController;
 use App\Http\Controllers\Admin\ProductController;
-
-
 use App\Http\Controllers\Customer\AuthController as CustomerAuth;
 
+/*
+|--------------------------------------------------------------------------
+| Debug route (KEEP TEMPORARILY)
+|--------------------------------------------------------------------------
+*/
+Route::get('/__broadcast-debug', function () {
+    return [
+        'web' => auth('web')->check(),
+        'customer' => auth('customer')->check(),
+        'admin' => auth('admin')->check(),
+        'guards' => config('broadcasting.guards'),
+    ];
+});
 
-Route::prefix('admin')
+/*
+|--------------------------------------------------------------------------
+| Broadcasting auth routes (CORRECT WAY)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:customer'])
+    ->post('/broadcasting/auth/customer', [BroadcastController::class, 'authenticate']);
+
+Route::middleware(['auth:admin'])
+    ->post('/broadcasting/auth/admin', [BroadcastController::class, 'authenticate']);
+
+/*
+|--------------------------------------------------------------------------
+| Admin routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('web')
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
@@ -25,11 +54,14 @@ Route::prefix('admin')
 
         Route::middleware('auth:admin')->group(function () {
 
-            Route::resource('products', ProductController::class);
-
             Route::get('/dashboard', function () {
                 return Inertia::render('Admin/Dashboard');
             })->name('dashboard');
+
+            Route::resource('products', ProductController::class)->except(['show']);
+
+            Route::get('/imports', [ProductImportController::class, 'index'])
+                ->name('imports.index');
 
             Route::get('/products/import', function () {
                 return Inertia::render('Admin/ProductImport');
@@ -40,24 +72,33 @@ Route::prefix('admin')
         });
     });
 
+/*
+|--------------------------------------------------------------------------
+| Customer routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('web')
+    ->prefix('customer')
+    ->group(function () {
 
-Route::prefix('customer')->group(function () {
-    Route::get('/register', [CustomerAuth::class, 'showRegister'])->name('customer.register');
-    Route::post('/register', [CustomerAuth::class, 'register']);
+        Route::get('/register', [CustomerAuth::class, 'showRegister'])
+            ->name('customer.register');
 
+        Route::post('/register', [CustomerAuth::class, 'register']);
 
-    Route::get('/login', [CustomerAuth::class, 'showLogin'])->name('customer.login');
-    Route::post('/login', [CustomerAuth::class, 'login']);
-    Route::post('/logout', [CustomerAuth::class, 'logout'])->name('customer.logout');
+        Route::get('/login', [CustomerAuth::class, 'showLogin'])
+            ->name('customer.login');
 
-    Route::middleware('auth:customer')->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Customer/Dashboard');
-        })->name('customer.dashboard');
+        Route::post('/login', [CustomerAuth::class, 'login']);
+
+        Route::post('/logout', [CustomerAuth::class, 'logout'])
+            ->name('customer.logout');
+
+        Route::middleware('auth:customer')->group(function () {
+            Route::get('/dashboard', function () {
+                return Inertia::render('Customer/Dashboard');
+            })->name('customer.dashboard');
+        });
     });
-});
-
-
-
 
 require __DIR__ . '/settings.php';

@@ -26,7 +26,7 @@ class ProductController extends Controller
             ->when($request->stock === 'out', function ($q) {
                 $q->where('product_stock', '=', 0);
             })
-            ->latest()
+            ->orderBy('product_id', 'desc')
             ->paginate(10)
             ->withQueryString(); // ⭐ keeps filters during pagination
 
@@ -42,7 +42,6 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Create');
     }
 
-    // STORE
     public function store(Request $request)
     {
         $validated = $request->validate([

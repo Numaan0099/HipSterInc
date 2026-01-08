@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Events\AdminOnlineStatusChanged;
+use App\Events\UserOnlineStatusChanged;
+
 
 use Inertia\Inertia;
 use App\Models\Admin;
@@ -31,7 +34,12 @@ class AuthController extends Controller
             return response()->json(['error' => 'Invalid admin credentials'], 401);
         }
 
+        $admin = Auth::guard('admin')->user();
 
+        $admin->update([
+            'is_online' => 1
+        ]);
+        broadcast(new AdminOnlineStatusChanged($admin))->toOthers();
         $request->session()->regenerate();
 
         return redirect()->route('admin.dashboard');
@@ -39,13 +47,15 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('admin')->logout();
+        $admin = auth('admin')->user();
 
+        Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');
     }
+
 
     public function showRegister()
     {
