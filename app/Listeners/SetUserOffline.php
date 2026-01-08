@@ -19,7 +19,7 @@ class SetUserOffline
 
         if ($event->guard === 'customer' && $event->user) {
             $event->user->update(['is_online' => false]);
-            broadcast(new CustomerOnlineStatusChanged($event->user));
+            broadcast(new CustomerOnlineStatusChanged($event->user, false));
 
         }
     }

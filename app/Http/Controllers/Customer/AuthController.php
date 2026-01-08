@@ -27,11 +27,9 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-
         if (!Auth::guard('customer')->attempt($credentials)) {
             return response()->json(['error' => 'Invalid customer credentials'], 401);
         }
-
 
         $request->session()->regenerate();
         $customer = Auth::guard('customer')->user();
@@ -39,9 +37,13 @@ class AuthController extends Controller
         $customer->update([
             'is_online' => 1
         ]);
-        broadcast(new CustomerOnlineStatusChanged($customer))->toOthers();
+        broadcast(new CustomerOnlineStatusChanged($customer, true))->toOthers();
 
-        return redirect()->route('customer.dashboard');
+        // Return JSON response instead of redirect
+        return response()->json([
+            'success' => true,
+            'redirect' => route('customer.dashboard')
+        ]);
     }
 
     public function logout(Request $request)

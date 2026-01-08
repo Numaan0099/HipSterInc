@@ -26,7 +26,7 @@ Route::middleware(['auth:customer'])
 
 Route::middleware(['auth:admin'])
     ->post('/broadcasting/auth/admin', [BroadcastController::class, 'authenticate']);
-    
+
 Route::middleware('web')
     ->prefix('admin')
     ->name('admin.')
